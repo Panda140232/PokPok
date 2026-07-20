@@ -1,0 +1,549 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PokDeng Score Tracker</title>
+    <style>
+        :root {
+            --primary: #e53935;
+            --secondary: #1e88e5;
+            --dark: #263238;
+            --light: #f8f9fa;
+            --success: #43a047;
+            --warning: #ffb300;
+        }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: var(--light);
+            color: var(--dark);
+        }
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 15px;
+        }
+        h1, h2 {
+            text-align: center;
+            color: var(--primary);
+            margin-top: 10px;
+        }
+        .tab-bar {
+            display: flex;
+            background: white;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            overflow: hidden;
+        }
+        .tab-btn {
+            flex: 1;
+            padding: 15px;
+            text-align: center;
+            cursor: pointer;
+            font-weight: bold;
+            background: #eee;
+            border: none;
+            transition: 0.3s;
+            font-size: 16px;
+        }
+        .tab-btn.active {
+            background: var(--primary);
+            color: white;
+        }
+        .tab-content {
+            display: none;
+        }
+        .tab-content.active {
+            display: block;
+        }
+        .card {
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.08);
+            margin-bottom: 20px;
+        }
+        .flex-group {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+        input[type="text"], input[type="number"] {
+            flex: 1;
+            padding: 12px;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+            font-size: 16px;
+        }
+        button {
+            padding: 12px 20px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        .btn-main {
+            background-color: var(--primary);
+            color: white;
+        }
+        .player-box {
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 15px;
+            background: #fff;
+        }
+        .player-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 18px;
+            font-weight: bold;
+            border-bottom: 1px solid #f0f0f0;
+            padding-bottom: 8px;
+            margin-bottom: 10px;
+        }
+        .score-row {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 8px;
+            margin-bottom: 8px;
+        }
+        .btn-score {
+            background-color: #f1f3f4;
+            color: var(--dark);
+            padding: 12px 2px;
+            font-size: 15px;
+            border-radius: 6px;
+            text-align: center;
+            font-weight: bold;
+            border: none;
+            cursor: pointer;
+        }
+        .btn-score:active {
+            background-color: #e0e0e0;
+        }
+        .btn-action-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+            margin-bottom: 8px;
+        }
+        .btn-tie {
+            background-color: #fff9c4;
+            color: #f57f17;
+            padding: 10px 2px;
+            font-size: 14px;
+            border-radius: 6px;
+            font-weight: bold;
+            border: none;
+            cursor: pointer;
+        }
+        .btn-view {
+            background-color: #e8f5e9;
+            color: #2e7d32;
+            padding: 10px 2px;
+            font-size: 14px;
+            border-radius: 6px;
+            font-weight: bold;
+            border: none;
+            cursor: pointer;
+        }
+        .history-box {
+            background: #fdfdfd;
+            border: 1px dashed #ccc;
+            border-radius: 6px;
+            padding: 8px;
+            margin-top: 10px;
+            font-size: 13px;
+            max-height: 110px;
+            overflow-y: auto;
+        }
+        .history-tag {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 4px;
+            margin: 3px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: transform 0.1s;
+        }
+        .history-tag:active {
+            transform: scale(0.95);
+        }
+        .history-plus { background: #e8f5e9; color: #2e7d32; border: 1px solid #c8e6c9; }
+        .history-minus { background: #ffebee; color: #c62828; border: 1px solid #ffcdd2; }
+        .history-zero { background: #fffde7; color: #f57f17; border: 1px solid #fff9c4; }
+        
+        .dealer-display {
+            background: #fff3e0;
+            border: 2px solid #ffb74d;
+            text-align: center;
+            padding: 25px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+        }
+        .dealer-score {
+            font-size: 36px;
+            font-weight: bold;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        th, td {
+            padding: 14px;
+            text-align: left;
+            border-bottom: 1px solid #e0e0e0;
+        }
+        th {
+            background-color: var(--secondary);
+            color: white;
+            font-size: 16px;
+        }
+        td {
+            font-size: 18px;
+        }
+        .text-center { text-align: center; }
+        .text-danger { color: var(--primary); }
+        .text-success { color: var(--success); }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>🃏 ป๊อกเด้ง Score Tracker</h1>
+
+    <div class="tab-bar">
+        <button class="tab-btn active" id="btn-tab-input">📝 กรอกแต้มผู้เล่น</button>
+        <button class="tab-btn" id="btn-tab-dashboard">📊 สรุปผล (Dashboard)</button>
+    </div>
+
+    <!-- หน้าที่ 1: กรอกแต้ม & จัดการคะแนนส่วนตัว -->
+    <div id="input-tab" class="tab-content active">
+        <div class="card">
+            <h2>👥 เพิ่มผู้เล่นใหม่</h2>
+            <div class="flex-group">
+                <input type="text" id="playerNameInput" placeholder="ชื่อผู้เล่น...">
+                <input type="number" id="playerPinInput" pattern="\d*" placeholder="PIN (ตัวเลข)..." style="max-width: 140px;">
+            </div>
+            <button class="btn-main" id="btnAddPlayer" style="width: 100%;">เพิ่มผู้เล่นเข้าสู่ระบบ</button>
+        </div>
+
+        <div id="playersSection">
+            <p id="emptyMessage" style="text-align:center; color:#888;">ยังไม่มีผู้เล่นในระบบ กรุณาเพิ่มรายชื่อด้านบน</p>
+        </div>
+    </div>
+
+    <!-- หน้าที่ 2: Dashboard สรุปผลแต้มรวมเจ้ามือและผู้เล่นทุกคน -->
+    <div id="dashboard-tab" class="tab-content">
+        <div class="dealer-display">
+            <h2 style="margin: 0 0 10px 0; color: #e65100;">👑 คะแนนรวมของ "เจ้ามือ"</h2>
+            <div id="dbDealerScore" class="dealer-score">0 แต้ม</div>
+            <p style="margin: 5px 0 0 0; font-size: 13px; color: #666;">(คำนวณจากผลรวมตรงข้ามของผู้เล่นทุกคน)</p>
+        </div>
+
+        <div class="card" style="padding: 10px 0;">
+            <h2 style="margin-bottom: 15px;">🏆 ตารางคะแนนรวมผู้เล่น</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th style="padding-left: 20px;">ชื่อผู้เล่น</th>
+                        <th class="text-center">คะแนนรวมทั้งหมด</th>
+                    </tr>
+                </thead>
+                <tbody id="dbPlayerRows">
+                    <tr id="emptyTableRow"><td colspan="2" class="text-center" style="color:#aaa; font-size:14px;">ไม่มีข้อมูลคะแนน</td></tr>
+                </tbody>
+            </table>
+        </div>
+
+        <button class="btn-main" id="btnResetGame" style="width: 100%; background-color: var(--dark); padding: 15px; margin-top: 10px;">🧹 รีเซ็ตแต้ม / เริ่มเกมใหม่</button>
+    </div>
+</div>
+
+<script>
+    let appPlayers = [];
+
+    // สลับแท็บ
+    document.getElementById('btn-tab-input').addEventListener('click', function() {
+        document.getElementById('input-tab').classList.add('active');
+        document.getElementById('dashboard-tab').classList.remove('active');
+        document.getElementById('btn-tab-input').classList.add('active');
+        document.getElementById('btn-tab-dashboard').classList.remove('active');
+    });
+
+    document.getElementById('btn-tab-dashboard').addEventListener('click', function() {
+        document.getElementById('input-tab').classList.remove('active');
+        document.getElementById('dashboard-tab').classList.add('active');
+        document.getElementById('btn-tab-input').classList.remove('active');
+        document.getElementById('btn-tab-dashboard').classList.add('active');
+        renderDashboard();
+    });
+
+    // ปุ่มเพิ่มผู้เล่น
+    document.getElementById('btnAddPlayer').addEventListener('click', function() {
+        const nameInput = document.getElementById('playerNameInput');
+        const pinInput = document.getElementById('playerPinInput');
+        
+        const name = nameInput.value.trim();
+        const pin = pinInput.value.trim();
+        
+        if (name === '') { 
+            alert('กรุณากรอกชื่อผู้เล่นด้วยครับ'); 
+            return; 
+        }
+        if (pin === '') {
+            alert('กรุณากรอกรหัส PIN (เป็นตัวเลข) ด้วยครับ');
+            return;
+        }
+        
+        if (appPlayers.some(p => p.name === name)) {
+            alert('ชื่อนี้มีอยู่แล้วในระบบ');
+            return;
+        }
+
+        appPlayers.push({
+            name: name,
+            pin: String(pin),
+            score: 0,
+            history: [],
+            isUnlocked: false
+        });
+
+        nameInput.value = '';
+        pinInput.value = '';
+        
+        const emptyMsg = document.getElementById('emptyMessage');
+        if(emptyMsg) emptyMsg.style.display = 'none';
+
+        createPlayerDOM(appPlayers.length - 1);
+        alert(`เพิ่มผู้เล่น "${name}" เรียบร้อยแล้ว! (รหัส PIN: ${pin})`);
+    });
+
+    // สร้าง UI ผู้เล่น
+    function createPlayerDOM(index) {
+        const playerData = appPlayers[index];
+        const container = document.getElementById('playersSection');
+
+        const box = document.createElement('div');
+        box.className = 'player-box';
+        box.id = 'p-box-' + index;
+
+        // ส่วนหัวข้อ
+        const header = document.createElement('div');
+        header.className = 'player-header';
+        header.innerHTML = '<span>👤 ' + playerData.name + '</span><span id="p-total-' + index + '">รวม: ****</span>';
+        box.appendChild(header);
+
+        // แถวแต้มบวก (+10, +20, +30, +50)
+        const plusRow = document.createElement('div');
+        plusRow.className = 'score-row';
+        [10, 20, 30, 50].forEach(val => {
+            const btn = document.createElement('button');
+            btn.className = 'btn-score';
+            btn.style.color = 'var(--success)';
+            btn.innerText = '+' + val;
+            btn.onclick = () => addScore(index, val);
+            plusRow.appendChild(btn);
+        });
+        box.appendChild(plusRow);
+
+        // แถวแต้มลบ (-10, -20, -30, -50)
+        const minusRow = document.createElement('div');
+        minusRow.className = 'score-row';
+        [-10, -20, -30, -50].forEach(val => {
+            const btn = document.createElement('button');
+            btn.className = 'btn-score';
+            btn.style.color = 'var(--primary)';
+            btn.innerText = val;
+            btn.onclick = () => addScore(index, val);
+            minusRow.appendChild(btn);
+        });
+        box.appendChild(minusRow);
+
+        // แถวปุ่มการทำงาน
+        const actionRow = document.createElement('div');
+        actionRow.className = 'btn-action-row';
+        
+        const tieBtn = document.createElement('button');
+        tieBtn.className = 'btn-tie';
+        tieBtn.innerText = '🤝 ชน (0)';
+        tieBtn.onclick = () => addScore(index, 0);
+
+        const viewBtn = document.createElement('button');
+        viewBtn.className = 'btn-view';
+        viewBtn.id = 'p-view-btn-' + index;
+        viewBtn.innerText = '👁️ ดู/แก้คะแนนรายตา';
+        viewBtn.onclick = () => toggleViewScore(index);
+
+        actionRow.appendChild(tieBtn);
+        actionRow.appendChild(viewBtn);
+        box.appendChild(actionRow);
+
+        // ประวัติ
+        const historyBox = document.createElement('div');
+        historyBox.className = 'history-box';
+        historyBox.id = 'p-history-' + index;
+        historyBox.innerHTML = '<span style="color:#aaa;">🔒 ซ่อนประวัติคะแนน</span>';
+        box.appendChild(historyBox);
+
+        container.appendChild(box);
+    }
+
+    // ตรวจสอบ PIN เพื่อแสดง/ซ่อนคะแนนในหน้าแรก
+    function toggleViewScore(playerIndex) {
+        const player = appPlayers[playerIndex];
+
+        if (player.isUnlocked) {
+            player.isUnlocked = false;
+            updatePlayerUI(playerIndex);
+            return;
+        }
+
+        const inputPin = prompt(`กรอกรหัส PIN ของ "${player.name}" เพื่อดู/แก้ประวัติแต้ม:`);
+        if (inputPin !== null) {
+            if (String(inputPin).trim() === player.pin) {
+                player.isUnlocked = true;
+                updatePlayerUI(playerIndex);
+            } else {
+                alert('รหัส PIN ไม่ถูกต้อง!');
+            }
+        }
+    }
+
+    // บันทึกคะแนน
+    function addScore(playerIndex, amount) {
+        const player = appPlayers[playerIndex];
+        player.history.push(amount);
+        recalculateTotalScore(playerIndex);
+        updatePlayerUI(playerIndex);
+    }
+
+    // คำนวณผลรวมคะแนนใหม่ทั้งหมดจาก Array ประวัติ
+    function recalculateTotalScore(playerIndex) {
+        const player = appPlayers[playerIndex];
+        player.score = player.history.reduce((sum, val) => sum + val, 0);
+    }
+
+    // แก้ไขหรือลบแต้มในตาที่เลือก
+    function editRoundScore(playerIndex, roundIndex) {
+        const player = appPlayers[playerIndex];
+        const currentVal = player.history[roundIndex];
+        const displayRound = roundIndex + 1;
+
+        const action = prompt(
+            `🎯 แก้ไขคะแนน ตาที่ ${displayRound} ของ "${player.name}"\n` +
+            `คะแนนปัจจุบันในตานี้: ${currentVal > 0 ? '+' : ''}${currentVal}\n\n` +
+            `• พิมพ์ตัวเลขใหม่ (เช่น 20 หรือ -30) แล้วกด OK\n` +
+            `• พิมพ์คำว่า "del" เพื่อลบตานี้ทิ้ง`,
+            currentVal
+        );
+
+        if (action === null) return;
+
+        const cleanAction = action.trim().toLowerCase();
+
+        if (cleanAction === 'del' || cleanAction === 'ลบ') {
+            player.history.splice(roundIndex, 1);
+            alert(`ลบคะแนนตาที่ ${displayRound} เรียบร้อยแล้ว`);
+        } else {
+            const newVal = parseInt(cleanAction, 10);
+            if (isNaN(newVal)) {
+                alert("กรุณากรอกตัวเลขที่ถูกต้อง หรือพิมพ์ del เพื่อลบครับ");
+                return;
+            }
+            player.history[roundIndex] = newVal;
+        }
+
+        recalculateTotalScore(playerIndex);
+        updatePlayerUI(playerIndex);
+    }
+
+    // อัปเดต UI หน้าแรก
+    function updatePlayerUI(playerIndex) {
+        const player = appPlayers[playerIndex];
+        const totalElem = document.getElementById('p-total-' + playerIndex);
+        const viewBtn = document.getElementById('p-view-btn-' + playerIndex);
+        const historyElem = document.getElementById('p-history-' + playerIndex);
+
+        if (player.isUnlocked) {
+            totalElem.innerText = 'รวม: ' + (player.score > 0 ? '+' : '') + player.score;
+            totalElem.className = player.score > 0 ? 'text-success' : (player.score < 0 ? 'text-danger' : '');
+            viewBtn.innerText = '🙈 ซ่อนคะแนน';
+            
+            if (player.history.length === 0) {
+                historyElem.innerHTML = '<span style="color:#aaa;">ยังไม่มีประวัติการเล่น</span>';
+            } else {
+                historyElem.innerHTML = '<div style="margin-bottom: 4px; color:#666; font-size:11px;">💡 แตะที่ตัวเลขแต้มด้านล่างเพื่อแก้ไข/ลบ ตานั้นๆ:</div>' + 
+                player.history.map((val, rIndex) => {
+                    let tagClass = 'history-zero';
+                    let label = `ตา${rIndex+1}: ชน`;
+                    if (val > 0) { tagClass = 'history-plus'; label = `ตา${rIndex+1}: +${val}`; }
+                    else if (val < 0) { tagClass = 'history-minus'; label = `ตา${rIndex+1}: ${val}`; }
+                    return `<span class="history-tag ${tagClass}" onclick="editRoundScore(${playerIndex}, ${rIndex})">${label} ✏️</span>`;
+                }).join('');
+            }
+        } else {
+            totalElem.innerText = 'รวม: ****';
+            totalElem.className = '';
+            viewBtn.innerText = '👁️ ดู/แก้คะแนนรายตา';
+            historyElem.innerHTML = '<span style="color:#aaa;">🔒 ซ่อนประวัติคะแนน</span>';
+        }
+        
+        historyElem.scrollTop = historyElem.scrollHeight;
+    }
+
+    // คำนวณ Dashboard สรุปผลเจ้ามือ และสร้างตารางแสดงคะแนนรวมของผู้เล่นทุกคน
+    function renderDashboard() {
+        const tbody = document.getElementById('dbPlayerRows');
+        tbody.innerHTML = '';
+
+        if (appPlayers.length === 0) {
+            tbody.innerHTML = '<tr id="emptyTableRow"><td colspan="2" class="text-center" style="color:#aaa; font-size:14px;">ไม่มีข้อมูลคะแนน</td></tr>';
+            document.getElementById('dbDealerScore').innerText = '0 แต้ม';
+            document.getElementById('dbDealerScore').className = 'dealer-score';
+            return;
+        }
+
+        let totalPlayersScore = 0;
+
+        appPlayers.forEach(player => {
+            totalPlayersScore += player.score;
+
+            const tr = document.createElement('tr');
+            const scoreClass = player.score > 0 ? 'text-success' : (player.score < 0 ? 'text-danger' : '');
+            const displayScore = (player.score > 0 ? '+' : '') + player.score;
+
+            tr.innerHTML = `
+                <td style="padding-left: 20px; font-weight: bold;">👤 ${player.name}</td>
+                <td class="text-center ${scoreClass}" style="font-weight: bold;">${displayScore}</td>
+            `;
+            tbody.appendChild(tr);
+        });
+
+        // แต้มรวมเจ้ามือ = ผลรวมตรงข้ามของผู้เล่นทุกคน
+        const dealerScore = -totalPlayersScore;
+        const dealerElem = document.getElementById('dbDealerScore');
+        dealerElem.innerText = (dealerScore > 0 ? '+' : '') + dealerScore + ' แต้ม';
+        dealerElem.className = 'dealer-score ' + (dealerScore > 0 ? 'text-success' : (dealerScore < 0 ? 'text-danger' : ''));
+    }
+
+    // ปุ่มรีเซ็ตเกม
+    document.getElementById('btnResetGame').addEventListener('click', function() {
+        if (appPlayers.length === 0) return;
+        
+        if (confirm('คุณต้องการรีเซ็ตคะแนนและลบรายชื่อผู้เล่นทั้งหมดเพื่อเริ่มเกมใหม่ใช่หรือไม่?')) {
+            appPlayers = [];
+            document.getElementById('playersSection').innerHTML = '<p id="emptyMessage" style="text-align:center; color:#888;">ยังไม่มีผู้เล่นในระบบ กรุณาเพิ่มรายชื่อด้านบน</p>';
+            renderDashboard();
+            alert('รีเซ็ตข้อมูลเรียบร้อยแล้ว');
+        }
+    });
+</script>
+
+</body>
+</html>
